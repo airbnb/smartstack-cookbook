@@ -1,0 +1,28 @@
+#!/bin/bash
+set -o errexit -o nounset -o pipefail
+
+zk_root=<%= File.join(node.smartstack.zk_home, "zookeeper-#{node.smartstack.zk_version}") %>
+zk_cfg=<%= File.join(@options[:dir], 'zookeeper.cfg') %>
+zk_main=org.apache.zookeeper.server.quorum.QuorumPeerMain
+
+java_opts=( -Xms64m -Xmx128m "$zk_main" "$zk_cfg" )
+
+function set_classpath {
+  for zk in $(find "$zk_root"/ -name 'zookeeper-*.jar')
+  do
+    echo 'zk.jar:' $zk
+    CLASSPATH="$zk${CLASSPATH:+:$CLASSPATH}"
+  done
+
+  for lib in $(find "$zk_root/lib" -name '*.jar')
+  do
+    CLASSPATH="$lib${CLASSPATH:+:$CLASSPATH}"
+  done
+  export CLASSPATH
+}
+
+set_classpath
+echo "classpath is $CLASSPATH"
+
+ulimit -n 65536
+exec 2>&1 chpst -u zookeeper:zookeeper java "${java_opts[@]}"

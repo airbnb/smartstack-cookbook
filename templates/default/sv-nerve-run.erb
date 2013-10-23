@@ -1,0 +1,14 @@
+#!/bin/bash
+
+<% if node.nerve.jarname %>
+# run the java version of nerve
+cd <%= node.nerve.home %>
+exec chpst -u <%= node.smartstack.user %> java -Xmx64m -XX:PermSize=64m -jar <%= node.nerve.jarname %> --config <%= node.nerve.config_file %> 2>&1
+
+<% else                  %>
+# run the ruby version of nerve
+cd <%= node.nerve.install_dir %>
+export GEM_HOME=<%= node.smartstack.gem_home %>
+exec chpst -u <%= node.smartstack.user %> bundle exec ./bin/nerve --config <%= node.nerve.config_file %> 2>&1
+
+<% end                   %>

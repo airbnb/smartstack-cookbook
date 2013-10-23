@@ -1,0 +1,18 @@
+#!/bin/bash
+
+exec ruby -r sinatra -e "
+set :port, <%= node.smartstack.helloworld.port %>
+set :bind, '0.0.0.0'
+
+get '/' do
+  'hello'
+end
+
+get '/health' do
+  'OK'
+end
+
+get '/ping' do
+  'PONG'
+end
+"

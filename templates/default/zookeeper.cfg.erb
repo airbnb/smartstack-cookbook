@@ -1,0 +1,37 @@
+# The number of milliseconds of each tick
+tickTime=2000
+# The number of ticks that the initial
+# synchronization phase can take
+initLimit=20
+# The number of ticks that can pass between
+# sending a request and getting an acknowledgement
+syncLimit=10
+# the directory where the snapshot is stored.
+dataDir=<%= @dir %>/data
+# the port at which the clients will connect
+clientPort=<%= @port %>
+# limit on queued clients - default: 1000
+globalOutstandingLimit=1000
+# number of transactions before snapshots are taken - default: 10000
+spanCount=10000
+# max # of clients - 0==unlimited
+maxClientCnxns=0
+# Election implementation to use. A value of "0" corresponds to the original
+# UDP-based version, "1" corresponds to the non-authenticated UDP-based
+# version of fast leader election, "2" corresponds to the authenticated
+# UDP-based version of fast leader election, and "3" corresponds to TCP-based
+# version of fast leader election. Currently, only 0 and 3 are supported,
+# 3 being the default
+electionAlg=3
+# Leader accepts client connections. Default value is "yes". The leader
+# machine coordinates updates. For higher update throughput at thes slight
+# expense of read throughput the leader can be configured to not accept
+# clients and focus on coordination.
+leaderServes=yes
+# Skips ACL checks. This results in a boost in throughput, but opens up full
+# access to the data tree to everyone.
+skipACL=yes
+
+server.0=127.0.0.1:2182:2183
+server.1=127.0.0.1:3182:3183
+server.2=127.0.0.1:4182:4183
