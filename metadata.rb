@@ -1,3 +1,4 @@
+name             'smartstack'
 maintainer       'Igor Serebryany'
 maintainer_email 'igor.serebryany@airbnb.com'
 license          'MIT'
