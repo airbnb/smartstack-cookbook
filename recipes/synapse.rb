@@ -43,7 +43,6 @@ git node.synapse.install_dir do
   group             node.smartstack.user
   repository        node.synapse.repository
   reference         node.synapse.reference
-  ssh_wrapper       node.smartstack.git_wrapper
   enable_submodules true
   action     :sync
   notifies   :run, 'execute[synapse_install]', :immediately

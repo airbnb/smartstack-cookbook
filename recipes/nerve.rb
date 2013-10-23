@@ -22,7 +22,6 @@ else
     group             node.smartstack.user
     repository        node.nerve.repository
     reference         node.nerve.reference
-    ssh_wrapper       node.smartstack.git_wrapper
     enable_submodules true
     action     :sync
     notifies   :run, 'execute[nerve_install]', :immediately

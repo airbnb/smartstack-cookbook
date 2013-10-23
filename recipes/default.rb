@@ -11,23 +11,6 @@ directory node.smartstack.home do
   recursive true
 end
 
-# set up keys for pulling private repos
-# remove after open-sourcing the repos
-keyfile = File.join(node.smartstack.home, "git_key")
-cookbook_file "deploy_key" do
-  mode     00400
-  owner    node.smartstack.user
-  group    node.smartstack.user
-  path     keyfile
-end
-
-file node.smartstack.git_wrapper do
-  mode     00500
-  owner    node.smartstack.user
-  group    node.smartstack.user
-  content  "ssh -i #{keyfile} -o StrictHostKeyChecking=no $1 $2"
-end
-
 # we need git to install smartstack
 package 'git'
 
