@@ -32,6 +32,21 @@ describe_recipe 'smartstack::test' do
     end
   end
 
+  describe 'nerve' do
+    it 'restarts cleanly' do
+      [0..5].each do |trial|
+        down = shell_out!('sv down nerve')
+        down.status.exitstatus.must_equal 0
+
+        up = shell_out!('sv up nerve')
+        up.status.exitstatus.must_equal 0
+      end
+    end
+
+    it 'properly handles signals' do
+    end
+  end
+
   describe 'proper config' do
     parallelize_me!
 
