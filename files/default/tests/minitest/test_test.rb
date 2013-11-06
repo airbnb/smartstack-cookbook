@@ -120,12 +120,12 @@ describe_recipe 'smartstack::test' do
 
     context 'when the service is down' do
       before do
-        shell_out("sv down helloworld")
-        sleep 4
+        http_take_down('helloworld')
+        sleep 2
       end
 
       after do
-        shell_out("sv up helloworld")
+        http_bring_up('helloworld')
         sleep 2
       end
 
@@ -144,9 +144,9 @@ describe_recipe 'smartstack::test' do
 
     context 'when the service has been restarted' do
       before do
-        shell_out('sv down helloworld')
-        sleep 4
-        shell_out('sv up helloworld')
+        http_take_down('helloworld')
+        sleep 2
+        http_bring_up('helloworld')
         sleep 2
       end
 
