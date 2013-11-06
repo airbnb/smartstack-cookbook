@@ -19,8 +19,8 @@ Vagrant.configure("2") do |master_config|
   # master_config.berkshelf.except = []
 
   master_config.vm.define "smartstack" do |config|
-    config.vm.box = "airbase"
-    config.vm.box_url = "https://s3.amazonaws.com/gsc-vagrant-boxes/ubuntu-12.04.2-server-amd64.box"
+    config.vm.box     = "smartstack"
+    config.vm.box_url = "https://airbnb-public.s3.amazonaws.com/vagrant-boxes/ubuntu12.04-chef11.4.4-vbox4210.box"
 
     config.vm.network :private_network, ip: '172.16.1.3'
 
