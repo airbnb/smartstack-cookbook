@@ -1,0 +1,7 @@
+{
+    "run_list": [
+                  "recipe[smartstack::default]",
+                  "recipe[smartstack::nerve]",
+                  "recipe[smartstack::synapse]"
+                ]
+}
