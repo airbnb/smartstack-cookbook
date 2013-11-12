@@ -32,7 +32,7 @@ describe_recipe 'smartstack::test' do
     end
   end
 
-  describe 'nerve' do
+  describe 'nerve shutdown handling' do
     it 'restarts cleanly' do
       [0..5].each do |trial|
         down = shell_out!('sv down nerve')
@@ -158,6 +158,20 @@ describe_recipe 'smartstack::test' do
   end
 
   describe 'synapse haproxy handling' do
+    it %{generates the correct frontend and backend stanzas} do
+      haproxy_config = parsed_haproxy_config
+
+      haproxy_config['frontend'].must_include 'helloworld'
+      haproxy_config['backend'].must_include 'helloworld'
+
+      haproxy_config['frontend']['helloworld']['config'].must_include 'default_backend helloworld'
+      haproxy_config['frontend']['helloworld']['config'].must_include(
+        "bind localhost:#{node.smartstack.service_ports['helloworld']}")
+
+      haproxy_config['backend']['helloworld']['config'].to_s.must_match(
+        /.*server.*#{node.ipaddress}:#{node.smartstack.helloworld.port}.*/)
+    end
+
     it %{doesn't restart haproxy when removing a service}
     it %{doesn't restart haproxy when removing and then adding a service}
     it %{restarts haproxy when adding a service for the first time}
