@@ -126,6 +126,7 @@ describe_recipe 'smartstack::test' do
 
     context 'when the service is down' do
       before do
+        @pid = IO.read('/var/run/haproxy.pid')
         stop_all('helloworld', helloworld_ports)
       end
 
@@ -147,6 +148,10 @@ describe_recipe 'smartstack::test' do
 
         response = Net::HTTP.get_response('localhost', '/health', synapse_port)
         response.must_be_kind_of Net::HTTPServiceUnavailable
+      end
+
+      it "hasn't caused haproxy to restart" do
+        IO.read('/var/run/haproxy.pid').must_equal @pid
       end
     end
 
@@ -183,10 +188,6 @@ describe_recipe 'smartstack::test' do
           /"server[^"]*#{node.ipaddress}:#{port}/)
       end
     end
-
-    it %{doesn't restart haproxy when removing a service}
-    it %{doesn't restart haproxy when removing and then adding a service}
-    it %{restarts haproxy when adding a service for the first time}
   end
 
   describe 'zookeeper handling' do
@@ -201,6 +202,4 @@ describe_recipe 'smartstack::test' do
       end
     end
   end
-
-
 end
