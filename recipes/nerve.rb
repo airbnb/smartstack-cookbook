@@ -61,13 +61,14 @@ node.nerve.enabled_services.each do |service_name|
   check['host'] = node.ipaddress
 
   # support multiple copies of the service on one machine with multiple ports in services
-  if check.include? 'ports'
-    check['ports'].each do |port|
-      check['port'] = port
-      node.default.nerve.config.services["#{service_name}_#{port}"] = check
-    end
-  else
-    node.default.nerve.config.services[service_name] = check if check['port']
+  check['ports'] ||= []
+  check['ports'] << check['port'] if check['port']
+  Chef::Log.warn "[nerve] service #{service_name} has no check ports configured" if check['ports'].empty?
+
+  # add the checks to the nerve config
+  check['ports'].each do |port|
+    check['port'] = port
+    node.default.nerve.config.services["#{service_name}_#{port}"] = check
   end
 end
 

@@ -9,6 +9,7 @@ describe_recipe 'smartstack::test' do
 
   let(:synapse_config) { JSON.parse(File.open(node.synapse.config_file).read()) }
   let(:nerve_config) { JSON.parse(File.open(node.nerve.config_file).read()) }
+  let(:helloworld_ports) { node.smartstack.helloworld.ports }
 
   describe 'service creation' do
     parallelize_me!
@@ -21,8 +22,10 @@ describe_recipe 'smartstack::test' do
       service('synapse').must_be_running
     end
 
-    it 'starts the helloworld service' do
-      service('helloworld').must_be_running
+    it 'starts the helloworld services' do
+      helloworld_ports.each do |port|
+        service("helloworld#{port}").must_be_running
+      end
     end
 
     it 'starts 3 zookeeper boxes' do
@@ -32,12 +35,30 @@ describe_recipe 'smartstack::test' do
     end
   end
 
+  describe 'nerve shutdown handling' do
+    it 'restarts cleanly' do
+      [0..5].each do |trial|
+        down = shell_out!('sv down nerve')
+        down.status.exitstatus.must_equal 0
+
+        up = shell_out!('sv up nerve')
+        up.status.exitstatus.must_equal 0
+      end
+    end
+
+    it 'properly handles signals' do
+    end
+  end
+
   describe 'proper config' do
     parallelize_me!
 
-    it 'includes a helloworld section in nerve config' do
+    it 'includes helloworld sections in nerve config' do
       nerve_config.must_include 'services'
-      nerve_config['services'].must_include 'helloworld'
+
+      helloworld_ports.each do |port|
+        nerve_config['services'].must_include "helloworld_#{port}"
+      end
     end
 
     describe 'properly configures synapse for helloworld' do
@@ -56,35 +77,35 @@ describe_recipe 'smartstack::test' do
   describe 'helloworld works' do
     parallelize_me!
 
-    let(:port) { node.smartstack.helloworld.port }
+    let(:ports) { helloworld_ports }
 
     it 'responds to /health' do
-      response = Net::HTTP.get_response('localhost', '/health', port)
-      response.must_be_kind_of Net::HTTPOK
+      ports.each do |port|
+        response = Net::HTTP.get_response('localhost', '/health', port)
+        response.must_be_kind_of Net::HTTPOK
+      end
     end
 
     it 'responds to /ping' do
-      response = Net::HTTP.get_response('localhost', '/ping', port)
-      response.must_be_kind_of Net::HTTPOK
+      ports.each do |port|
+        response = Net::HTTP.get_response('localhost', '/ping', port)
+        response.must_be_kind_of Net::HTTPOK
+      end
     end
   end
 
   describe 'proper discovery' do
-    let(:zk_node) {
-      registration_path = nerve_config['services']['helloworld']['zk_path']
-      registration_node = nerve_config['instance_id'] + '_helloworld'
-      "#{registration_path}/#{registration_node}"
-    }
-
     context 'when the service is up' do
       it 'is properly registered in zookeeper' do
-        service = nerve_config['services']['helloworld']
+        nerve_config['services'].each do |name, service|
+          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
 
-        output = zk_cli("get #{zk_node}")
+          output = zk_cli("get #{zk_node}")
 
-        output.stderr.wont_include "Node does not exist"
-        output.stdout.must_include service['host']
-        output.stdout.must_include service['port'].to_s
+          output.stderr.wont_include "Node does not exist"
+          output.stdout.must_include service['host']
+          output.stdout.must_include service['port'].to_s
+        end
       end
 
       it 'is available via synapse' do
@@ -105,18 +126,21 @@ describe_recipe 'smartstack::test' do
 
     context 'when the service is down' do
       before do
-        shell_out("sv down helloworld")
-        sleep 4
+        @pid = IO.read('/var/run/haproxy.pid')
+        stop_all('helloworld', helloworld_ports)
       end
 
       after do
-        shell_out("sv up helloworld")
-        sleep 2
+        start_all('helloworld', helloworld_ports)
       end
 
       it 'is unavailable in zookeeper' do
-        output = zk_cli("get #{zk_node}")
-        output.stderr.must_include "Node does not exist"
+        nerve_config['services'].each do |name, service|
+          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
+
+          output = zk_cli("get #{zk_node}")
+          output.stderr.must_include "Node does not exist"
+        end
       end
 
       it 'is unreachable via synapse' do
@@ -125,27 +149,45 @@ describe_recipe 'smartstack::test' do
         response = Net::HTTP.get_response('localhost', '/health', synapse_port)
         response.must_be_kind_of Net::HTTPServiceUnavailable
       end
+
+      it "hasn't caused haproxy to restart" do
+        IO.read('/var/run/haproxy.pid').must_equal @pid
+      end
     end
 
     context 'when the service has been restarted' do
       before do
-        shell_out('sv down helloworld')
-        sleep 4
-        shell_out('sv up helloworld')
-        sleep 2
+        stop_all('helloworld', helloworld_ports)
+        start_all('helloworld', helloworld_ports)
       end
 
       it 'is again available in zookeeper' do
-        output = zk_cli("get #{zk_node}")
-        output.stderr.wont_include "Node does not exist"
+        nerve_config['services'].each do |name, service|
+          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
+
+          output = zk_cli("get #{zk_node}")
+          output.stderr.wont_include "Node does not exist"
+        end
       end
     end
   end
 
   describe 'synapse haproxy handling' do
-    it %{doesn't restart haproxy when removing a service}
-    it %{doesn't restart haproxy when removing and then adding a service}
-    it %{restarts haproxy when adding a service for the first time}
+    it %{generates the correct frontend and backend stanzas} do
+      haproxy_config = parsed_haproxy_config
+
+      haproxy_config['frontend'].must_include 'helloworld'
+      haproxy_config['backend'].must_include 'helloworld'
+
+      haproxy_config['frontend']['helloworld']['config'].must_include 'default_backend helloworld'
+      haproxy_config['frontend']['helloworld']['config'].must_include(
+        "bind localhost:#{node.smartstack.service_ports['helloworld']}")
+
+      helloworld_ports.each do |port|
+        haproxy_config['backend']['helloworld']['config'].to_s.must_match(
+          /"server[^"]*#{node.ipaddress}:#{port}/)
+      end
+    end
   end
 
   describe 'zookeeper handling' do
@@ -160,6 +202,4 @@ describe_recipe 'smartstack::test' do
       end
     end
   end
-
-
 end

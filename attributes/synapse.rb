@@ -5,7 +5,7 @@ default.synapse.install_dir = File.join(node.synapse.home,'src')
 default.synapse.config_file = File.join(node.synapse.home,'config.json')
 
 default.synapse.repository = 'https://github.com/airbnb/synapse.git'
-default.synapse.reference = 'v0.5.1'
+default.synapse.reference = 'v0.7.0'
 
 # override this in your role file or wrapper cookbook
 default.synapse.enabled_services = []

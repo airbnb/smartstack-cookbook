@@ -5,7 +5,7 @@ default.nerve.install_dir = File.join(node.nerve.home,'src')
 default.nerve.config_file = File.join(node.nerve.home,'config.json')
 
 default.nerve.repository = 'https://github.com/airbnb/nerve.git'
-default.nerve.reference = 'v0.2.1'
+default.nerve.reference = 'v0.3.0'
 default.nerve.jarname = nil
 
 # a list of keys from node.smartstack.services (services cookbook)
