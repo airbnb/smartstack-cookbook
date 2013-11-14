@@ -1,7 +1,7 @@
 #!/bin/bash
 
 exec ruby -r sinatra -e "
-set :port, <%= node.smartstack.helloworld.port %>
+set :port, <%= @options[:port] %>
 set :bind, '0.0.0.0'
 
 get '/' do

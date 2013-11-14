@@ -19,37 +19,29 @@ module Helpers
       shell_out("#{script} #{command}")
     end
 
-    def http_take_down(service, max_wait = 10, sleep_time = 0.2)
-      port = node.smartstack[service].port
-      shell_out("sv down #{service}")
-
-      success = false
-      start = Time.now()
-      while (Time.now() - max_wait) < start
-        begin
-          response = Net::HTTP.get_response('localhost', '/health', port)
-        rescue Errno::ECONNREFUSED
-          success = true
-          break
-        rescue StandardError
-          # other errors are ignored
-        else
-          sleep sleep_time
-        end
+    def start_all(service, ports)
+      ports.each do |port|
+        shell_out("sv up #{service}#{port}")
       end
 
-      raise StandardError, "service #{service} never went down" unless success
+      ports.each do |port|
+        raise RuntimeError, "Service #{service}#{port} nerver came up" unless http_wait_for_up(port)
+      end
+
+      sleep 2 # to let nerve catch up
     end
 
-    def http_bring_up(service, max_wait = 10, sleep_time = 0.2)
-      port = node.smartstack[service].port
-      shell_out("sv up #{service}")
+    def http_wait_for_up(port, opts = {})
+      host       = opts['host']       || 'localhost'
+      uri        = opts['uri']        || '/health'
+      max_wait   = opts['max_wait']   || 10
+      sleep_time = opts['sleep_time'] || 0.2
 
       success = false
       start = Time.now()
       while (Time.now() - max_wait) < start
         begin
-          response = Net::HTTP.get_response('localhost', '/health', port)
+          response = Net::HTTP.get_response(host, uri, port)
         rescue
           # nothing
         end
@@ -62,7 +54,43 @@ module Helpers
         sleep sleep_time
       end
 
-      raise StandardError, "service #{service} never came up" unless success
+      return success
+    end
+
+    def stop_all(service, ports)
+      ports.each do |port|
+        shell_out("sv down #{service}#{port}")
+      end
+
+      ports.each do |port|
+        raise RuntimeError, "Service #{service}#{port} nerver went down" unless http_wait_for_down(port)
+      end
+
+      sleep 2 # to let nerve catch up
+    end
+
+    def http_wait_for_down(port, opts = {})
+      host       = opts['host']       || 'localhost'
+      uri        = opts['uri']        || '/health'
+      max_wait   = opts['max_wait']   || 10
+      sleep_time = opts['sleep_time'] || 0.2
+
+      success = false
+      start = Time.now()
+      while (Time.now() - max_wait) < start
+        begin
+          response = Net::HTTP.get_response(host, uri, port)
+        rescue Errno::ECONNREFUSED
+          success = true
+          break
+        rescue StandardError
+          # other errors are ignored
+        else
+          sleep sleep_time
+        end
+      end
+
+      return success
     end
 
     # this is a very naive haproxy config parser, but it's good enough

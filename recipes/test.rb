@@ -2,9 +2,16 @@
 gem_package 'sinatra'
 
 include_recipe 'runit'
-runit_service 'helloworld' do
-  action [:enable, :start]
-  default_logger true
+node.smartstack.helloworld.ports.each do |port|
+  runit_service "helloworld#{port}" do
+    run_template_name  'helloworld'
+    action             [:enable, :start]
+    default_logger     true
+
+    options({
+        :port   => port
+      })
+  end
 end
 
 # set up a zookeeper cluster
