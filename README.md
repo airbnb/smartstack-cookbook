@@ -15,7 +15,7 @@ This cookbook contains everything you need to get SmartStack up and running, bot
 If you are ready to install SmartStack on your machines, you will first need to do a bit of prep.
 First, you will need [Zookeeper](https://cwiki.apache.org/confluence/display/ZOOKEEPER/ProjectDescription) running in your infrastructure.
 We recommend using an [existing cookbook](https://github.com/SimpleFinance/chef-zookeeper).
-For now, you can just set up a single machine, but for production use we recommend an [ensemble]() of at least 3 nodes managed with [exhibitor]().
+For now, you can just set up a single machine, but for production use we recommend an [ensemble](http://zookeeper.apache.org/doc/r3.1.2/zookeeperAdmin.html#sc_zkMulitServerSetup) of at least 3 nodes managed with [exhibitor](https://github.com/Netflix/exhibitor/wiki).
 
 ### Configure chef ###
 
@@ -32,11 +32,11 @@ See the more extensive documentation below if you need additional help.
 
 ## Dev and Testing ##
 
-This cookbook is configured to be easy to run in dev using [vagrant]().
+This cookbook is configured to be easy to run in dev using [vagrant](http://www.vagrantup.com/).
 To get started:
 
-* Install Virtualbox; it's free, and available [here](https://www.virtualbox.org/wiki/Downloads).
-* Install Vagrant from [here](http://downloads.vagrantup.com/); this cookbook has been tested with v1.3.5
+* Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads); it's free!
+* Install [Vagrant](http://downloads.vagrantup.com/); this cookbook has been tested with v1.3.5
 * Install the [berkshelf](http://berkshelf.com/) plugin for vagrant: `vagrant plugin install vagrant-berkshelf`
 * Bring up SmartStack in a VM: `vagrant up`
 
@@ -208,7 +208,7 @@ Lets look at ssspy's synapse config:
 ```
 
 The `server_options` directive tells haproxy to run checks on each backend with proper check intervals.
-You can read more about the haproxy check options [here](https://code.google.com/p/haproxy-docs/wiki/ServerOptions).
+You can read more about the [haproxy check options](https://code.google.com/p/haproxy-docs/wiki/ServerOptions).
 The `discovery` section tells us how synapse will find ssspy; in this case, via zookeeper.
 
 Finally, the `listen` section contains additional haproxy configuration.
