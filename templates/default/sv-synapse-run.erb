@@ -1,5 +1,14 @@
 #!/bin/bash
 
+<% if node.synapse.jarname %>
+# run the java version of synapse
+cd <%= node.synapse.home %>
+exec chpst -u <%= node.smartstack.user %> java <%= node.synapse.jvmopts %> -jar <%= node.synapse.jarname %> --config <%= node.synapse.config_file %> 2>&1
+
+<% else                  %>
+# run the ruby version of synapse
 cd <%= node.synapse.install_dir %>
 export GEM_HOME=<%= node.smartstack.gem_home %>
 exec chpst -u <%= node.smartstack.user %> bundle exec ./bin/synapse --config <%= node.synapse.config_file %> 2>&1
+
+<% end                   %>
