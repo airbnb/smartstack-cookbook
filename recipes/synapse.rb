@@ -38,26 +38,36 @@ directory node.synapse.home do
   recursive true
 end
 
-git node.synapse.install_dir do
-  user              node.smartstack.user
-  group             node.smartstack.user
-  repository        node.synapse.repository
-  reference         node.synapse.reference
-  enable_submodules true
-  action     :sync
-  notifies   :run, 'execute[synapse_install]', :immediately
-  notifies   :restart, 'runit_service[synapse]'
-end
+if node.synapse.jarname
+  include_recipe 'java'
 
-# do the actual install of synapse and dependencies
-execute "synapse_install" do
-  cwd     node.synapse.install_dir
-  user    node.smartstack.user
-  group   node.smartstack.user
-  action  :nothing
+  url = "#{node.common.ssspy.url}/synapse/#{node.synapse.jarname}"
+  remote_file File.join(node.synapse.home, node.synapse.jarname) do
+    source url
+    mode   00644
+  end
+else
+  git node.synapse.install_dir do
+    user              node.smartstack.user
+    group             node.smartstack.user
+    repository        node.synapse.repository
+    reference         node.synapse.reference
+    enable_submodules true
+    action     :sync
+    notifies   :run, 'execute[synapse_install]', :immediately
+    notifies   :restart, 'runit_service[synapse]'
+  end
 
-  environment ({'GEM_HOME' => node.smartstack.gem_home})
-  command     "bundle install --without development"
+  # do the actual install of synapse and dependencies
+  execute "synapse_install" do
+    cwd     node.synapse.install_dir
+    user    node.smartstack.user
+    group   node.smartstack.user
+    action  :nothing
+
+    environment ({'GEM_HOME' => node.smartstack.gem_home})
+    command     "bundle install --without development"
+  end
 end
 
 # add the enabled services to the synapse config
