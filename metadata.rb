@@ -2,7 +2,7 @@ name             'smartstack'
 maintainer       'Igor Serebryany'
 maintainer_email 'igor.serebryany@airbnb.com'
 license          'MIT'
-version          '0.4.0'
+version          '0.4.1'
 
 description      'The cookbook for configuring Airbnb SmartStack'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
