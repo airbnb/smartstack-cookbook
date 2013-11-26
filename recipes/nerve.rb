@@ -11,7 +11,7 @@ end
 if node.nerve.jarname
   include_recipe 'java'
 
-  url = "#{node.common.ssspy.url}/nerve/#{node.nerve.jarname}"
+  url = "#{node.smartstack.jar_source}/nerve/#{node.nerve.jarname}"
   remote_file File.join(node.nerve.home, node.nerve.jarname) do
     source url
     mode   00644

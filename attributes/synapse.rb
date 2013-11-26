@@ -68,6 +68,8 @@ default.synapse.config = {
 }
 
 # add localhost aliases for each enabled service
+# at airbnb, this is handled by our infrastructure common cookbook,
+# which owns generating /etc/hosts from a template
 node.synapse.enabled_services.each do |service_name|
   default.common.localhost_aliases << "#{service_name}.synapse"
 end

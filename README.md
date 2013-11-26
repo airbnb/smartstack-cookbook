@@ -123,7 +123,7 @@ run_list(
 However, you would normally do this if you are writing a role file for your service.
 This probably means that you wrote the service as well.
 In this case, you'll need to write the [nerve/synapse configuration](#configuring-smartstack) for the service.
-You'll also want to make sure that your service has the [correct endpoints](https://github.com/airbnb/services/blob/master/smartstack.md).
+You'll also want to make sure that your service has the correct endpoints for [health](#health-checks) and [connectivity](#connectivity-checks) checks.
 
 Once nerve is configured to check your service on your boxes, it will start making health checks.
 You can see the health checks being made in nerve's log, in `/etc/service/nerve/log`.
@@ -213,7 +213,7 @@ The `discovery` section tells us how synapse will find ssspy; in this case, via 
 
 Finally, the `listen` section contains additional haproxy configuration.
 It specifies how haproxy will conduct it's own health checks.
-SSSPy is [following convention](https://github.com/airbnb/services/blob/master/smartstack.md), and has properly implemented a `/ping` endpoint for connectivity checks.
+SSSPy is following convention by properly implemented a `/ping` endpoint for [connectivity checks](#connectivity-checks).
 
 ### Health Checks ###
 
@@ -238,6 +238,18 @@ Here is an example from [optica](https://github.com/airbnb/optica), a simple Sin
 
 The `healthy?` function does [real work](https://github.com/airbnb/optica/blob/164ee747425eb823994345203fd40089751724f5/store.rb#L94) to make sure the service actually functions.
 Only nerve will ever hit that endpoint, so you can and should feel free to make it take some time.
+
+### Connectivity Checks ###
+
+If a particular backend for your service passes it's [health checks](#health-checks), it might still be unavailable to consumers.
+One example is a network partition -- synapse has discovered your service, but can't actually reach it.
+To prevent such problems, we configure the haproxy on the consumer end to do connectivity checks when possible.
+
+We do this by utilizing [haproxy's built-in checking mechanism](http://cbonte.github.io/haproxy-dconv/configuration-1.4.html#5-check).
+To destinguish between health checks made by nerve and connectivity checks made by haproxy on the synapse end, we define a `/ping` endpoint.
+This endpoint should *always* return `200` with a conventional text body of `PONG`.
+
+Because the number of machines making connectivity checks may be large, you should strive to make the `/ping` check as lightweight as possible.
 
 ## Zookeeper and Smartstack ##
 

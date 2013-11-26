@@ -41,7 +41,7 @@ end
 if node.synapse.jarname
   include_recipe 'java'
 
-  url = "#{node.common.ssspy.url}/synapse/#{node.synapse.jarname}"
+  url = "#{node.smartstack.jar_source}/synapse/#{node.synapse.jarname}"
   remote_file File.join(node.synapse.home, node.synapse.jarname) do
     source url
     mode   00644
