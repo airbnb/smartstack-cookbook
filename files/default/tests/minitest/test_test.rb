@@ -98,13 +98,11 @@ describe_recipe 'smartstack::test' do
     context 'when the service is up' do
       it 'is properly registered in zookeeper' do
         nerve_config['services'].each do |name, service|
-          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
+          service_entry = {
+            'host'=>service['host'], 'port'=>service['port'], 'name'=>nerve_config['instance_id']}
+          nodes = zk_nodes(service['zk_path'])
 
-          output = zk_cli("get #{zk_node}")
-
-          output.stderr.wont_include "Node does not exist"
-          output.stdout.must_include service['host']
-          output.stdout.must_include service['port'].to_s
+          nodes.must_include service_entry
         end
       end
 
@@ -136,10 +134,11 @@ describe_recipe 'smartstack::test' do
 
       it 'is unavailable in zookeeper' do
         nerve_config['services'].each do |name, service|
-          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
+          service_entry = {
+            'host'=>service['host'], 'port'=>service['port'], 'name'=>nerve_config['instance_id']}
+          nodes = zk_nodes(service['zk_path'])
 
-          output = zk_cli("get #{zk_node}")
-          output.stderr.must_include "Node does not exist"
+          nodes.wont_include service_entry
         end
       end
 
@@ -163,10 +162,11 @@ describe_recipe 'smartstack::test' do
 
       it 'is again available in zookeeper' do
         nerve_config['services'].each do |name, service|
-          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
+          service_entry = {
+            'host'=>service['host'], 'port'=>service['port'], 'name'=>nerve_config['instance_id']}
+          nodes = zk_nodes(service['zk_path'])
 
-          output = zk_cli("get #{zk_node}")
-          output.stderr.wont_include "Node does not exist"
+          nodes.must_include service_entry
         end
       end
     end
