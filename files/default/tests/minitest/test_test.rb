@@ -173,9 +173,9 @@ describe_recipe 'smartstack::test' do
   end
 
   describe 'synapse haproxy handling' do
-    it %{generates the correct frontend and backend stanzas} do
-      haproxy_config = parsed_haproxy_config
+    let(:haproxy_config) { parsed_haproxy_config }
 
+    it %{generates the correct frontend and backend stanzas} do
       haproxy_config['frontend'].must_include 'helloworld'
       haproxy_config['backend'].must_include 'helloworld'
 
@@ -187,6 +187,16 @@ describe_recipe 'smartstack::test' do
         haproxy_config['backend']['helloworld']['config'].to_s.must_match(
           /"server[^"]*#{node.ipaddress}:#{port}/)
       end
+    end
+
+    it %{puts only one of multiple backends into haproxy config when leader-election is enabled} do
+      nodes = zk_nodes(synapse_config['services']['helloworld-leader']['discovery']['path'])
+      nodes.count.must_be :>, 1
+
+      backend_lines = haproxy_config['backend']['helloworld-leader']['config']
+      server_lines = backend_lines.select{|l| l.strip.start_with? 'server'}
+
+      server_lines.count.must_equal 1
     end
   end
 
