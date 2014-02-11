@@ -13,6 +13,7 @@ if node.smartstack.env == 'test'
   # enable helloworld
   default.nerve.enabled_services << 'helloworld'
   default.synapse.enabled_services << 'helloworld'
+  default.synapse.enabled_services << 'helloworld-leader'
 
   # zk settings
   default.smartstack.zk_version = '3.4.5'

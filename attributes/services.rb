@@ -1,5 +1,9 @@
 include_attribute 'smartstack::ports'
 
+# on chef-solo < 11.6, we hack around lack of environment support
+# by using node.env because node.environment cannot be set
+default.smartstack.env = (node.has_key?('env') ? node.env : node.environment)
+
 default.smartstack.services = {
   'synapse' => {},
   'nerve'   => {},
@@ -24,11 +28,22 @@ default.smartstack.services = {
       ],
     },
   },
-}
 
-# on chef-solo < 11.6, we hack around lack of environment support
-# by using node.env because node.environment cannot be set
-default.smartstack.env = (node.has_key?('env') ? node.env : node.environment)
+  'helloworld-leader' => {
+    'zk_path' => "/#{node.smartstack.env}/services/helloworld/services",
+    'synapse' => {
+      'discovery' => { 'method' => 'zookeeper' },
+      'leader_election' => true,
+      'haproxy' => {
+        'server_options' => 'check inter 1s rise 1 fall 1',
+        'listen' => [
+          'mode http',
+          'option httpchk GET /ping',
+        ],
+      },
+    },
+  }
+}
 
 # make sure each service has a smartstack config
 default.smartstack.services.each do |name, service|

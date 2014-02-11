@@ -1,4 +1,5 @@
 require 'net/http'
+require 'json'
 
 module Helpers
   module SmartStack
@@ -17,6 +18,27 @@ module Helpers
         "zookeeper-#{node.smartstack.zk_version}",
         'bin/zkCli.sh')
       shell_out("#{script} #{command}")
+    end
+
+    # returns parsed json data from all nodes at the given path
+    def zk_nodes(path)
+      namelist = zk_cli("ls #{path}").stdout.split("\n").last
+      node_names = namelist[1...-1].split(',').map{|n| n.strip}
+
+      nodes = []
+      node_names.each do |name|
+        lines = zk_cli("get #{path}/#{name}").stdout.split("\n")
+        lines.select{|l| l.start_with? '{'}.each do |line|
+          begin
+            data = JSON.parse(line)
+            nodes << data
+          rescue
+            # skip lines that are not valid json
+          end
+        end
+      end
+
+      nodes
     end
 
     def start_all(service, ports)

@@ -98,13 +98,11 @@ describe_recipe 'smartstack::test' do
     context 'when the service is up' do
       it 'is properly registered in zookeeper' do
         nerve_config['services'].each do |name, service|
-          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
+          service_entry = {
+            'host'=>service['host'], 'port'=>service['port'], 'name'=>nerve_config['instance_id']}
+          nodes = zk_nodes(service['zk_path'])
 
-          output = zk_cli("get #{zk_node}")
-
-          output.stderr.wont_include "Node does not exist"
-          output.stdout.must_include service['host']
-          output.stdout.must_include service['port'].to_s
+          nodes.must_include service_entry
         end
       end
 
@@ -136,10 +134,11 @@ describe_recipe 'smartstack::test' do
 
       it 'is unavailable in zookeeper' do
         nerve_config['services'].each do |name, service|
-          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
+          service_entry = {
+            'host'=>service['host'], 'port'=>service['port'], 'name'=>nerve_config['instance_id']}
+          nodes = zk_nodes(service['zk_path'])
 
-          output = zk_cli("get #{zk_node}")
-          output.stderr.must_include "Node does not exist"
+          nodes.wont_include service_entry
         end
       end
 
@@ -163,19 +162,20 @@ describe_recipe 'smartstack::test' do
 
       it 'is again available in zookeeper' do
         nerve_config['services'].each do |name, service|
-          zk_node = service['zk_path'] + '/' + "#{nerve_config['instance_id']}_#{name}"
+          service_entry = {
+            'host'=>service['host'], 'port'=>service['port'], 'name'=>nerve_config['instance_id']}
+          nodes = zk_nodes(service['zk_path'])
 
-          output = zk_cli("get #{zk_node}")
-          output.stderr.wont_include "Node does not exist"
+          nodes.must_include service_entry
         end
       end
     end
   end
 
   describe 'synapse haproxy handling' do
-    it %{generates the correct frontend and backend stanzas} do
-      haproxy_config = parsed_haproxy_config
+    let(:haproxy_config) { parsed_haproxy_config }
 
+    it %{generates the correct frontend and backend stanzas} do
       haproxy_config['frontend'].must_include 'helloworld'
       haproxy_config['backend'].must_include 'helloworld'
 
@@ -187,6 +187,16 @@ describe_recipe 'smartstack::test' do
         haproxy_config['backend']['helloworld']['config'].to_s.must_match(
           /"server[^"]*#{node.ipaddress}:#{port}/)
       end
+    end
+
+    it %{puts only one of multiple backends into haproxy config when leader-election is enabled} do
+      nodes = zk_nodes(synapse_config['services']['helloworld-leader']['discovery']['path'])
+      nodes.count.must_be :>, 1
+
+      backend_lines = haproxy_config['backend']['helloworld-leader']['config']
+      server_lines = backend_lines.select{|l| l.strip.start_with? 'server'}
+
+      server_lines.count.must_equal 1
     end
   end
 
