@@ -5,7 +5,7 @@ default.nerve.install_dir = File.join(node.nerve.home,'src')
 default.nerve.config_file = File.join(node.nerve.home,'config.json')
 
 default.nerve.repository = 'https://github.com/airbnb/nerve.git'
-default.nerve.reference = 'v0.4.0'
+default.nerve.reference = 'v0.5.3'
 default.nerve.jarname = nil
 default.nerve.jvmopts = '-Xmx64m -XX:PermSize=64m'
 
