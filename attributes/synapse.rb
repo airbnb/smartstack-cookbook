@@ -5,7 +5,7 @@ default.synapse.install_dir = File.join(node.synapse.home,'src')
 default.synapse.config_file = File.join(node.synapse.home,'config.json')
 
 default.synapse.repository = 'https://github.com/airbnb/synapse.git'
-default.synapse.reference = 'v0.9.1'
+default.synapse.reference = 'v0.10.0'
 default.synapse.jarname = nil
 default.synapse.jvmopts = '-Xmx64m -XX:PermSize=64m'
 
