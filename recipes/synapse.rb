@@ -28,7 +28,7 @@ file File.join("/etc/sudoers.d", node.smartstack.user) do
   owner   "root"
   group   "root"
   mode    0440
-  content "#{node.smartstack.user} ALL= NOPASSWD: /usr/sbin/service haproxy reload\n"
+  content "#{node.smartstack.user} ALL= NOPASSWD: #{node.smartstack.service_path} haproxy reload\n"
 end
 
 # get the synapse code
