@@ -118,5 +118,6 @@ end
 # set up runit service
 runit_service "synapse" do
   action :enable
+  cookbook node.synapse.runit_cookbook
   default_logger true
 end

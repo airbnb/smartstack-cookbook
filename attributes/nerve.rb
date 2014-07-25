@@ -15,6 +15,10 @@ default.nerve.enabled_services = []
 default.nerve.local.host = "127.0.0.1"
 default.nerve.local.port = 1025
 
+# Cookbook in which the runit_service LWRP will look for an sv-nerve-run.erb
+# template:
+default.nerve.runit_cookbook = 'smartstack'
+
 # everything below is used to configure nerve at runtime
 instance_id = node.hostname
 instance_id = node.ec2.instance_id if node.has_key? 'ec2'
