@@ -71,7 +71,7 @@ run_list(
 )
 ```
  
-Once you've done this and reconverged your boxes, the service will be available to you on `localhost` at it's synapse port.
+Once you've done this and reconverged your boxes, the service will be available to you on `localhost` at its synapse port.
 If you are writing out a config file in chef and need to specify the port to use, just use `node.smartstack.services.desired_service.local_port` in your config.
 You can manually look up your synapse port in `attributes/ports.rb` in this cookbook.
 
@@ -99,7 +99,7 @@ You can also safely reload haproxy if you suspect issues there -- existing conne
 [Nerve](https://github.com/airbnb/nerve) is the registration component for synapse.
 It takes care of creating entries for your services in Zookeeper.
 Your service will be published in zookeeper only when it passes the configured health checks.
-When your service stops passing health checks, it will be removed, and placed in maintenance mode in all of it's synapse consumers.
+When your service stops passing health checks, it will be removed, and placed in maintenance mode in all of its synapse consumers.
 
 ### Using Nerve #####
 
@@ -170,8 +170,8 @@ Let's start with the nerve config:
     },
 ```
 
-Nerve here is configured to make it's health checks on port 3260.
-This means that `ssspy` is properly running on it's own synapse port locally.
+Nerve here is configured to make its health checks on port 3260.
+This means that `ssspy` is properly running on its own synapse port locally.
 The checks happen every 2 seconds, and there's only one check -- an http check to the `/health` endpoint.
 
 This is the most usual configuration.
@@ -189,7 +189,7 @@ For instance, here is the config for `flog_thrift`:
     },
 ```
 
-For `flog_thift` to be up, it has to both be listening on it's thrift port via TCP and also pass it's http health check.
+For `flog_thift` to be up, it has to both be listening on its thrift port via TCP and also pass its http health check.
 
 Lets look at ssspy's synapse config:
 
@@ -212,7 +212,7 @@ You can read more about the [haproxy check options](https://code.google.com/p/ha
 The `discovery` section tells us how synapse will find ssspy; in this case, via zookeeper.
 
 Finally, the `listen` section contains additional haproxy configuration.
-It specifies how haproxy will conduct it's own health checks.
+It specifies how haproxy will conduct its own health checks.
 SSSPy is following convention by properly implemented a `/ping` endpoint for [connectivity checks](#connectivity-checks).
 
 ### Health Checks ###
@@ -241,7 +241,7 @@ Only nerve will ever hit that endpoint, so you can and should feel free to make 
 
 ### Connectivity Checks ###
 
-If a particular backend for your service passes it's [health checks](#health-checks), it might still be unavailable to consumers.
+If a particular backend for your service passes its [health checks](#health-checks), it might still be unavailable to consumers.
 One example is a network partition -- synapse has discovered your service, but can't actually reach it.
 To prevent such problems, we configure the haproxy on the consumer end to do connectivity checks when possible.
 
@@ -256,14 +256,14 @@ Because the number of machines making connectivity checks may be large, you shou
 Smartstack cannot function without [zookeeper](https://cwiki.apache.org/confluence/display/ZOOKEEPER/ProjectDescription).
 This shared file-like store provides the correct semantics for ensuring that service information is correct and distributed across our infrastructure.
 We use zookeeper because it provides the [ephemeral nodes](http://zookeeper.apache.org/doc/r3.2.1/zookeeperProgrammers.html#Ephemeral+Nodes) nerve uses to register services.
-It's distributed nature prevents it from becoming a scaling choke point or a single points of failure in our infrastructure.
+Its distributed nature prevents it from becoming a scaling choke point or a single points of failure in our infrastructure.
 
 ### Debugging Smartstack ###
 
 You would like to use your service from another service, but something is not working.
 These instructions will tell you how to debug the situation.
 
-First, on a consumer box (a box which has `the_service` in it's `'synapse' => { 'enabled_services'`) go to port 3212 in your browser.
+First, on a consumer box (a box which has `the_service` in its `'synapse' => { 'enabled_services'`) go to port 3212 in your browser.
 You'll see the haproxy stats page.
 There should be a section for `the_service` containing the boxes providing `the_service`
 
@@ -281,7 +281,7 @@ To check if it's (1), check `synapse` on the consumer box.
 If it looks like synapse is working, then the problem is probably (2) -- no registration.
 To debug, follow these steps:
 
-1. Check the service on one of it's instances
+1. Check the service on one of its instances
   * Is it running? Is it insta-crashing? watch `sv s the_service`
 2. If it's insta-crashing, figure out why
   * Check `/etc/service/the_service/logs/current`
