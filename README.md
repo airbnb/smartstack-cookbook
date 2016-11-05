@@ -217,11 +217,11 @@ SSSPy is following convention by properly implemented a `/ping` endpoint for [co
 
 ### Health Checks ###
 
-Nobody wants your service to recieve traffic when it's not actually functional.
+Nobody wants your service to receive traffic when it's not actually functional.
 Your consumers do not want that, because they want their service calls to work.
 And you don't want that, because you also want your service to work.
 
-You can make sure that a broken service instance won't recieve traffic by making your `/health` checks fail when your service is broken.
+You can make sure that a broken service instance won't receive traffic by making your `/health` checks fail when your service is broken.
 Simply return a non-`200` status code.
 Here is an example from [optica](https://github.com/airbnb/optica), a simple Sinatra service:
 
