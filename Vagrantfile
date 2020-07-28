@@ -20,8 +20,11 @@ Vagrant.configure("2") do |master_config|
 
   master_config.vm.define "smartstack" do |config|
     config.vm.box     = "smartstack"
-    config.vm.box_url = "https://airbnb-public.s3.amazonaws.com/vagrant-boxes/ubuntu12.04-chef11.4.4-vbox4210.box"
 
+    # The url from where the 'config.vm.box' box will be fetched if it
+    # doesn't already exist on the user's system.
+    # config.vm.box_url = "http://domain.com/path/to/above.box"
+    
     config.vm.network :private_network, ip: '172.16.1.3'
 
     config.vm.provider "virtualbox" do |v|

@@ -8,7 +8,7 @@ directory node.nerve.home do
   recursive true
 end
 
-if node.nerve.jarname
+if node.smartstack.jar_source && node.nerve.jarname
   include_recipe 'java'
 
   url = "#{node.smartstack.jar_source}/nerve/#{node.nerve.jarname}"

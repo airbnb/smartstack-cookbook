@@ -38,7 +38,7 @@ directory node.synapse.home do
   recursive true
 end
 
-if node.synapse.jarname
+if node.smartstack.jar_source && node.synapse.jarname
   include_recipe 'java'
 
   url = "#{node.smartstack.jar_source}/synapse/#{node.synapse.jarname}"
