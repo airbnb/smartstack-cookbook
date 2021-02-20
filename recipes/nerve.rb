@@ -85,5 +85,6 @@ end
 # so, we only enable nerve; setting it up initially causes it to start,
 runit_service 'nerve' do
   action :enable
+  cookbook node.nerve.runit_cookbook
   default_logger true
 end

@@ -16,6 +16,10 @@ default.synapse.haproxy.sock_dir = '/var/haproxy'
 default.synapse.haproxy.sock_file = File.join(node.synapse.haproxy.sock_dir, 'stats.sock')
 default.synapse.haproxy.channel = 'local1'
 
+# Cookbook in which the runit_service LWRP will look for an sv-synapse-run.erb
+# template:
+default.synapse.runit_cookbook = 'smartstack'
+
 default.synapse.config = {
   'services' => {},
   'haproxy' => {
